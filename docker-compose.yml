@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  xiaozhi-mqtt-gateway:
+    build: .
+    container_name: xiaozhi-mqtt-gateway
+    restart: unless-stopped
+
+    # 端口映射
+    ports:
+      - "1883:1883"      # MQTT TCP 端口
+      - "8884:8884/udp"  # UDP 端口
+      - "8007:8007"      # 管理 API 端口
+
+    # 环境变量配置
+    environment:
+      # 必须配置项
+      # 本地部署：填写你的局域网 IP（如 192.168.1.100）
+      # 公网部署：填写你的公网 IP 或域名
+      - PUBLIC_IP=${PUBLIC_IP:-192.168.1.100}
+      - MQTT_SIGNATURE_KEY=${MQTT_SIGNATURE_KEY}
+
+      # 可选配置项（有默认值）
+      - MQTT_PORT=${MQTT_PORT:-1883}
+      - UDP_PORT=${UDP_PORT:-8884}
+      - API_PORT=${API_PORT:-8007}
+
+    # 挂载配置文件
+    volumes:
+      - ./config/mqtt.json:/app/config/mqtt.json:ro
+
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('net').connect(8007, 'localhost')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

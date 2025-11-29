@@ -4,3 +4,8 @@ build/
 dist/
 package-lock.json
 mqtt.json
+
+# Claude Code 配置
+.claude/
+.claude_history
+*.claude
